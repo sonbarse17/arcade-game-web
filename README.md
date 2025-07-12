@@ -4,6 +4,10 @@
 
 This project is a modern HTML5 endless runner game. It features advanced graphics, a responsive UI, and is built with vanilla JavaScript. The game is containerized using Docker for easy deployment.
 
+### Game Demo
+
+![Game Screenshot](screenshots/game-demo.png)
+
 ### Tech Stack
 
 - **Frontend:** HTML5, CSS, JavaScript
