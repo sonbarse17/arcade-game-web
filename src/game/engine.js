@@ -92,6 +92,7 @@ export default class GameEngine {
         this.gameState = 'playing';
         this.isPaused = false;
         this.showNewHighScore = false;
+        this.isRunning = true;
         this.reset();
         document.getElementById('pauseBtn').textContent = '⏸️ PAUSE';
     }
