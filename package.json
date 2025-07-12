@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "http-server public -p 8080 -o",
+    "start": "http-server . -p 8080 -o",
     "dev": "http-server public -p 8080 -o --cors",
     "build": "echo 'Build complete'",
     "test": "echo 'No tests specified'"
