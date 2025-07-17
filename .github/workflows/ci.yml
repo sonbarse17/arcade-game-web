@@ -34,9 +34,12 @@ jobs:
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v2
-      with:
-        projectKey: sonbarse17_arcade-game-web
-        organization: sonbarse17
+      with
+         args: >
+          -Dsonar.projectKey=sonbarse17_arcade-game-web
+          -Dsonar.organization=sonbarse17
+          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+          -Dsonar.branch.name=${{ github.ref_name }}  
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN_GITHUB }}
