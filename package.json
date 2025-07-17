@@ -9,7 +9,7 @@
     "dev": "http-server public -p 8080 -o --cors",
     "build": "echo 'Build complete'",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
-    "lint": "npx eslint src/**/*.js"
+    "lint": "node node_modules/eslint/bin/eslint.js src/**/*.js"
   },
   "dependencies": {
     "http-server": "^14.1.1"

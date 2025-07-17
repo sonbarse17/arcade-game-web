@@ -24,7 +24,7 @@ jobs:
       run: npm install
 
     - name: Lint The code
-      run: npx eslint src/**/*.js
+      run: node node_modules/eslint/bin/eslint.js src/**/*.js
        
     - name: Build application
       run: npm run build
