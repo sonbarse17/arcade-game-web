@@ -7,10 +7,11 @@ image:
 
 ingress:
   enabled: true
-  className: "nginx"
+  className: "gce"
   annotations:
-    kubernetes.io/tls-acme: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "arcade-game-prod-ip"
+    networking.gke.io/managed-certificates: "arcade-game-prod-cert"
   hosts:
     - host: arcade-game.example.com
       paths:

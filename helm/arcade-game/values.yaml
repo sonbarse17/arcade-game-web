@@ -47,10 +47,12 @@ service:
 
 ingress:
   enabled: false
-  className: "nginx"
-  annotations: {}
+  className: "gce"
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "arcade-game-ip"
   hosts:
-    - host: arcade-game.local
+    - host: arcade-game.example.com
       paths:
         - path: /
           pathType: Prefix

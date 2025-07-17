@@ -1,0 +1,13 @@
+{{- if and .Values.ingress.enabled .Values.ingress.annotations.networking\.gke\.io/managed-certificates -}}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{ include "arcade-game.fullname" . }}-cert
+  labels:
+    {{- include "arcade-game.labels" . | nindent 4 }}
+spec:
+  domains:
+    {{- range .Values.ingress.hosts }}
+    - {{ .host }}
+    {{- end }}
+{{- end }}

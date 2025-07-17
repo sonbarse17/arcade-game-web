@@ -209,12 +209,14 @@ This installs the ELK stack for centralized logging. The script:
 
 ## Step 9: Accessing Your Application
 
-To access your application, you can use the ingress IP address:
+To access your application, you can use the Google Cloud Load Balancer IP address:
 
 ```bash
 # Get the ingress IP address
 kubectl get ingress -n arcade-game-dev
 ```
+
+The GCE ingress controller will provision a Google Cloud Load Balancer automatically. It may take a few minutes for the load balancer to be fully provisioned and the IP address to be assigned.
 
 For local access without ingress, use port-forwarding:
 ```bash
@@ -222,6 +224,16 @@ kubectl port-forward svc/arcade-game-dev 8080:80 -n arcade-game-dev
 ```
 
 Then open http://localhost:8080 in your browser.
+
+### Setting up DNS
+
+Once you have the external IP address from the GCE ingress, you should configure your DNS provider to point your domain to this IP address:
+
+```bash
+# Get the external IP address
+EXTERNAL_IP=$(kubectl get ingress -n arcade-game-dev -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}')
+echo "Configure your DNS provider to point dev.arcade-game.example.com to $EXTERNAL_IP"
+```
 
 ## Step 10: Promoting to Production
 

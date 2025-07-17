@@ -6,6 +6,10 @@ image:
 
 ingress:
   enabled: true
+  className: "gce"
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "arcade-game-dev-ip"
   hosts:
     - host: dev.arcade-game.example.com
       paths:
