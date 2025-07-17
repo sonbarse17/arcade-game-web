@@ -64,5 +64,5 @@ docker run -p 8080:80 html5-arcade-game
 
 ---
 
-Created by Sushant Sonbarse
+Created by @Sushant Sonbarse
 [GitHub](https://github.com/sonbarse17)
