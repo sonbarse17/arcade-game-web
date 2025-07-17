@@ -57,6 +57,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/html5-arcade-game:latest,${{ secrets.DOCKER_USERNAME }}/html5-arcade-game:${{ github.sha }}
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/html5-arcade-game:latest,${{ secrets.DOCKERHUB_USERNAME }}/html5-arcade-game:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
