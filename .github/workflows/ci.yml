@@ -37,7 +37,7 @@ jobs:
       with:
         args: >
           -Dsonar.organization=sonbarse17
-          -Dsonar.projectKey=sonbarse17/arcade-game-web 
+          -Dsonar.projectKey=sonbarse17_arcade-game-web
           -Dsonar.sources=. 
           -Dsonar.host.url=https://sonarcloud.io 
           -Dsonar.branch.name=${{ github.ref_name }}
