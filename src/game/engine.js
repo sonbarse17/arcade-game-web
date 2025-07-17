@@ -1,5 +1,5 @@
 import Player from './player.js';
-import { Particle, ParticleSystem } from './particles.js';
+import { ParticleSystem } from './particles.js';
 import { AudioManager } from './audio.js';
 import { GameStorage } from './storage.js';
 

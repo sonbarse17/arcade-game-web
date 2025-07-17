@@ -11,7 +11,7 @@ export class AudioManager {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             this.createSounds();
-        } catch (e) {
+        } catch {
             console.warn('Audio not supported');
             this.enabled = false;
         }

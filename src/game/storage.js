@@ -16,7 +16,7 @@ export class GameStorage {
         try {
             const data = localStorage.getItem(this.storageKey);
             return data ? { ...this.defaultData, ...JSON.parse(data) } : this.defaultData;
-        } catch (e) {
+        } catch {
             return this.defaultData;
         }
     }
@@ -27,7 +27,7 @@ export class GameStorage {
             const newData = { ...currentData, ...data };
             localStorage.setItem(this.storageKey, JSON.stringify(newData));
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     }
@@ -64,7 +64,7 @@ export class GameStorage {
         try {
             localStorage.removeItem(this.storageKey);
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     }
