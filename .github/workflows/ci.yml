@@ -40,7 +40,6 @@ jobs:
           -Dsonar.projectKey=***_arcade-game-web 
           -Dsonar.sources=. 
           -Dsonar.host.url=https://sonarcloud.io 
-          -Dsonar.branch.name=${{ github.ref_name }}
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN_GITHUB }}
