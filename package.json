@@ -8,7 +8,7 @@
     "start": "http-server . -p 8080 -o",
     "dev": "http-server public -p 8080 -o --cors",
     "build": "echo 'Build complete'",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "node node_modules/cross-env/src/bin/cross-env.js NODE_OPTIONS=--experimental-vm-modules node node_modules/jest/bin/jest.js",
     "lint": "node node_modules/eslint/bin/eslint.js src/**/*.js"
   },
   "dependencies": {
