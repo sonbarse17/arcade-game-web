@@ -4,7 +4,7 @@ on:
   push:
     branches: [ testing ]
   pull_request:
-    branches: [ tesing ]
+    branches: [ testing ]
 
 jobs:
   build-and-deploy:
@@ -24,7 +24,7 @@ jobs:
       run: npm install
 
     - name: Lint The code
-      run: npm run lint
+      run: npx eslint src/**/*.js
        
     - name: Build application
       run: npm run build
