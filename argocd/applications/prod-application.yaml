@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arcade-game-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/sonbarse17/html5-arcade-game.git
+    targetRevision: main
+    path: helm/arcade-game
+    helm:
+      valueFiles:
+        - values-prod.yaml
+      parameters:
+        - name: image.repository
+          value: sonbarse17/html5-arcade-game
+        - name: image.tag
+          value: main-latest
+        - name: imagePullSecrets.create
+          value: "true"
+        - name: imagePullSecrets.registry
+          value: "https://index.docker.io/v1/"
+        - name: imagePullSecrets.username
+          value: "${DOCKERHUB_USERNAME}"
+        - name: imagePullSecrets.password
+          value: "${DOCKERHUB_PASSWORD}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arcade-game-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false  # Require manual approval for production
+    syncOptions:
+      - CreateNamespace=true

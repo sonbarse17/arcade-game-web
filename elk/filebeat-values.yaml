@@ -1,0 +1,35 @@
+daemonset:
+  enabled: true
+
+filebeatConfig:
+  filebeat.yml: |
+    filebeat.inputs:
+    - type: container
+      paths:
+        - /var/log/containers/*.log
+      processors:
+        - add_kubernetes_metadata:
+            host: ${NODE_NAME}
+            matchers:
+            - logs_path:
+                logs_path: "/var/log/containers/"
+
+    processors:
+      - add_cloud_metadata:
+      - add_host_metadata:
+
+    output.logstash:
+      hosts: ["logstash:5044"]
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "200Mi"
+  limits:
+    cpu: "300m"
+    memory: "500Mi"
+
+# Only collect logs from arcade-game namespaces
+extraEnvs:
+  - name: EXCLUDE_NAMESPACES
+    value: "kube-system,monitoring,argocd,elk"

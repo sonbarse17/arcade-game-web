@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: arcade-game
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: arcade-game
+  namespaceSelector:
+    matchNames:
+      - arcade-game-dev
+      - arcade-game-test
+      - arcade-game-prod
+  endpoints:
+    - port: http
+      interval: 15s
+      path: /metrics

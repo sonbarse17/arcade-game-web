@@ -1,0 +1,80 @@
+replicas: 1
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "1Gi"
+
+service:
+  type: ClusterIP
+  ports:
+    - name: beats
+      port: 5044
+      protocol: TCP
+      targetPort: 5044
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+
+persistence:
+  enabled: true
+  size: 5Gi
+
+logstashConfig:
+  logstash.yml: |
+    http.host: 0.0.0.0
+    xpack.monitoring.enabled: true
+    xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch-master:9200"]
+
+logstashPipeline:
+  logstash.conf: |
+    input {
+      beats {
+        port => 5044
+      }
+      http {
+        port => 8080
+      }
+    }
+
+    filter {
+      if [kubernetes][namespace] =~ "arcade-game-.*" {
+        mutate {
+          add_field => { "environment" => "%{[kubernetes][namespace]}" }
+        }
+        
+        # Extract environment name (dev, test, prod)
+        grok {
+          match => { "environment" => "arcade-game-(?<env_name>.*)" }
+        }
+        
+        # Parse JSON logs if available
+        if [message] =~ /^\{.*\}$/ {
+          json {
+            source => "message"
+          }
+        }
+      }
+    }
+
+    output {
+      elasticsearch {
+        hosts => ["http://elasticsearch-master:9200"]
+        user => "${ELASTICSEARCH_USERNAME}"
+        password => "${ELASTICSEARCH_PASSWORD}"
+        index => "arcade-game-%{env_name}-%{+YYYY.MM.dd}"
+      }
+    }
+
+extraEnvs:
+  - name: ELASTICSEARCH_USERNAME
+    value: elastic
+  - name: ELASTICSEARCH_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: elasticsearch-credentials
+        key: password

@@ -1,0 +1,95 @@
+# Default values for arcade-game
+# This is a YAML-formatted file.
+
+replicaCount: 1
+
+image:
+  repository: sonbarse17/html5-arcade-game
+  # Tag will be overridden by CI pipeline
+  tag: latest
+  pullPolicy: IfNotPresent
+  # CI specific settings
+  ci:
+    # Enable automatic tagging from CI pipeline
+    enabled: true
+    # Tag format: {branch}-{commit}-{timestamp}
+    tagFormat: "${BRANCH_NAME}-${COMMIT_SHA}-${BUILD_TIMESTAMP}"
+
+# Image pull secrets configuration
+imagePullSecrets:
+  create: false
+  registry: "https://index.docker.io/v1/"
+  username: ""
+  password: ""
+  names: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+  # Add metrics port for Prometheus
+  metrics:
+    enabled: true
+    port: 9113
+    name: metrics
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: arcade-game.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+env: []
+
+# Logging configuration
+logging:
+  enabled: true
+  # Configure log format for better parsing in ELK
+  format: json
+  # Include request ID in logs
+  includeRequestId: true
+
+# ServiceMonitor configuration for Prometheus
+serviceMonitor:
+  enabled: false
+  labels:
+    release: prometheus
+  interval: 15s
+  path: /metrics

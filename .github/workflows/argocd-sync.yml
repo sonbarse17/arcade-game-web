@@ -1,0 +1,58 @@
+name: ArgoCD Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to sync'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+          - all
+
+jobs:
+  sync:
+    name: Sync ArgoCD Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup ArgoCD CLI
+        run: |
+          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+          rm argocd-linux-amd64
+          
+      - name: Login to ArgoCD
+        run: |
+          argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+          
+      - name: Sync Application
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "all" ]; then
+            echo "Syncing all applications..."
+            argocd app sync arcade-game-dev
+            argocd app sync arcade-game-test
+            argocd app sync arcade-game-prod
+          else
+            echo "Syncing ${{ github.event.inputs.environment }} application..."
+            argocd app sync arcade-game-${{ github.event.inputs.environment }}
+          fi
+          
+      - name: Wait for Sync
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "all" ]; then
+            echo "Waiting for all applications to sync..."
+            argocd app wait arcade-game-dev --health
+            argocd app wait arcade-game-test --health
+            argocd app wait arcade-game-prod --health
+          else
+            echo "Waiting for ${{ github.event.inputs.environment }} application to sync..."
+            argocd app wait arcade-game-${{ github.event.inputs.environment }} --health
+          fi

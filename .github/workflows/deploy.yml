@@ -1,0 +1,143 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - main      # Production
+      - staging   # Test
+      - develop   # Dev
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    
+    # Map GitHub branches to environments
+    env:
+      DEPLOY_ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || (github.ref == 'refs/heads/staging' && 'test' || 'dev')) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.12.0'
+          
+      - name: Configure GKE credentials
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          
+      - name: Set up GKE cluster
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          cluster_name: arcade-game-${{ env.DEPLOY_ENV }}
+          location: ${{ vars.GKE_REGION }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+      - name: Generate image tags
+        id: tags
+        run: |
+          # Extract branch name
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          
+          # Generate timestamp
+          BUILD_TIMESTAMP=$(date -u +"%Y%m%d%H%M%S")
+          echo "BUILD_TIMESTAMP=$BUILD_TIMESTAMP" >> $GITHUB_ENV
+          
+          # Short commit SHA
+          SHORT_SHA=${GITHUB_SHA::7}
+          echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+          
+          # Set image tags
+          IMAGE_TAG="$BRANCH_NAME-$SHORT_SHA-$BUILD_TIMESTAMP"
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          
+          # For ArgoCD to pick up the latest image
+          echo "IMAGE_REPO=${{ vars.DOCKER_REGISTRY }}/html5-arcade-game" >> $GITHUB_ENV
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}
+            ${{ env.IMAGE_REPO }}:${{ env.DEPLOY_ENV }}-latest
+            ${{ env.IMAGE_REPO }}:latest
+          
+      - name: Deploy to Kubernetes
+        run: |
+          NAMESPACE="arcade-game-${{ env.DEPLOY_ENV }}"
+          kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+          
+          helm upgrade --install arcade-game-${{ env.DEPLOY_ENV }} ./helm/arcade-game \
+            --namespace $NAMESPACE \
+            --values ./helm/arcade-game/values-${{ env.DEPLOY_ENV }}.yaml \
+            --set image.repository=${{ env.IMAGE_REPO }} \
+            --set image.tag=${{ env.IMAGE_TAG }} \
+            --set image.ci.enabled=true \
+            --set image.ci.tagFormat="${{ env.BRANCH_NAME }}-${{ env.SHORT_SHA }}-${{ env.BUILD_TIMESTAMP }}" \
+            --set imagePullSecrets.create=true \
+            --set imagePullSecrets.registry="https://index.docker.io/v1/" \
+            --set imagePullSecrets.username="${{ secrets.DOCKERHUB_USERNAME }}" \
+            --set imagePullSecrets.password="${{ secrets.DOCKERHUB_TOKEN }}" \
+            --wait
+            
+      - name: Verify deployment
+        run: |
+          kubectl get all -n arcade-game-${{ env.DEPLOY_ENV }}
+          
+      - name: Update ArgoCD application
+        if: success() && secrets.ARGOCD_SERVER != ''
+        run: |
+          # Setup ArgoCD CLI
+          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+          rm argocd-linux-amd64
+          
+          # Login to ArgoCD
+          argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+          
+          # Update image tag in ArgoCD
+          argocd app set arcade-game-${{ env.DEPLOY_ENV }} -p image.tag=${{ env.IMAGE_TAG }}
+          
+          # Sync application
+          argocd app sync arcade-game-${{ env.DEPLOY_ENV }}
+          
+      - name: Post deployment notification
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "✅ Successfully deployed HTML5 Arcade Game to ${{ env.DEPLOY_ENV }} environment."
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

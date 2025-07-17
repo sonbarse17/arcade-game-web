@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "arcade-game.fullname" . }}
+  labels:
+    {{- include "arcade-game.labels" . | nindent 4 }}
+    {{- with .Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "arcade-game.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "arcade-game.selectorLabels" . | nindent 8 }}
+        {{- with .Values.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if or .Values.imagePullSecrets.create .Values.imagePullSecrets.names }}
+      imagePullSecrets:
+        {{- if .Values.imagePullSecrets.create }}
+        - name: {{ include "arcade-game.fullname" . }}-registry
+        {{- end }}
+        {{- range .Values.imagePullSecrets.names }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.logging.enabled }}
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: {{ include "arcade-game.fullname" . }}-nginx-config
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+        {{- if .Values.service.metrics.enabled }}
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:0.10.0
+          args:
+            - -nginx.scrape-uri=http://localhost/nginx_status
+          ports:
+            - name: metrics
+              containerPort: 9113
+              protocol: TCP
+        {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.env }}
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
+          {{- end }}
+          {{- if .Values.logging.enabled }}
+          # Logging configuration
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          {{- end }}

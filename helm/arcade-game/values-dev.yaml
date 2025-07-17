@@ -1,0 +1,35 @@
+# Development environment values
+replicaCount: 1
+
+image:
+  tag: latest
+
+ingress:
+  enabled: true
+  hosts:
+    - host: dev.arcade-game.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+env:
+  - name: ENV
+    value: "development"
+  - name: LOG_LEVEL
+    value: "debug"
+
+# Dev-specific labels
+labels:
+  environment: dev
+
+# Enable ServiceMonitor for dev environment
+serviceMonitor:
+  enabled: true

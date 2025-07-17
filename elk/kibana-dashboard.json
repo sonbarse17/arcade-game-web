@@ -1,0 +1,32 @@
+{
+  "attributes": {
+    "title": "Arcade Game Overview",
+    "hits": 0,
+    "description": "Overview dashboard for HTML5 Arcade Game",
+    "panelsJSON": "[{\"version\":\"7.10.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"title\":\"Log Volume by Environment\"},\"panelRefName\":\"panel_0\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"title\":\"HTTP Status Codes\"},\"panelRefName\":\"panel_1\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":0,\"y\":15,\"w\":48,\"h\":15,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"title\":\"Recent Errors\"},\"panelRefName\":\"panel_2\"}]",
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "version": 1,
+    "timeRestore": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    }
+  },
+  "references": [
+    {
+      "name": "panel_0",
+      "type": "visualization",
+      "id": "log-volume-by-environment"
+    },
+    {
+      "name": "panel_1",
+      "type": "visualization",
+      "id": "http-status-codes"
+    },
+    {
+      "name": "panel_2",
+      "type": "search",
+      "id": "recent-errors"
+    }
+  ],
+  "type": "dashboard"
+}

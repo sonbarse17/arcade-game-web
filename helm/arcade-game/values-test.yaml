@@ -1,0 +1,41 @@
+# Test environment values
+replicaCount: 2
+
+image:
+  tag: stable
+
+ingress:
+  enabled: true
+  hosts:
+    - host: test.arcade-game.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 70
+
+env:
+  - name: ENV
+    value: "testing"
+  - name: LOG_LEVEL
+    value: "info"
+
+# Test-specific labels
+labels:
+  environment: test
+
+# Enable ServiceMonitor for test environment
+serviceMonitor:
+  enabled: true
