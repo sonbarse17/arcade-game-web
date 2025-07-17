@@ -1,0 +1,29 @@
+project_id   = "your-gcp-project-id"
+region       = "us-central1"
+vpc_name     = "arcade-game-vpc"
+cluster_name = "arcade-game"
+
+# Optional: Override default environment configurations
+# environments = {
+#   dev = {
+#     node_count    = 1
+#     machine_type  = "e2-medium"
+#     subnet_cidr   = "10.10.0.0/20"
+#     pod_cidr      = "10.20.0.0/16"
+#     service_cidr  = "10.30.0.0/16"
+#   },
+#   test = {
+#     node_count    = 2
+#     machine_type  = "e2-standard-2"
+#     subnet_cidr   = "10.11.0.0/20"
+#     pod_cidr      = "10.21.0.0/16"
+#     service_cidr  = "10.31.0.0/16"
+#   },
+#   prod = {
+#     node_count    = 3
+#     machine_type  = "e2-standard-4"
+#     subnet_cidr   = "10.12.0.0/20"
+#     pod_cidr      = "10.22.0.0/16"
+#     service_cidr  = "10.32.0.0/16"
+#   }
+# }
